@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment contents
+venv/
+
+# Temporary files
+temp/
+
+# Data to be consumed during runtime
+data/
+
+# IDE Files
+.idea/
+.vscode/
