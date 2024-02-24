@@ -29,6 +29,7 @@ def analyze(df: DataFrame, target: str, savefig = True):
         df (DataFrame): Dataframe with time series information. 
         target (str): Column name of `df` from which we are analyzing granularity
     """
+    print('\n-- Granularity --')
     series = df[target]
     grans: list[str] = ["D", "W", "M"]
 
@@ -51,5 +52,6 @@ def analyze(df: DataFrame, target: str, savefig = True):
 
     if (savefig):
         fig.savefig(f'temp/{target}_granularity.png')
+        print(f'saved temp/{target}_granularity.png')
     else:
         show()
