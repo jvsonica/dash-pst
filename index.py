@@ -1,13 +1,13 @@
 import pandas as pd
 from preprocess import preprocess
 from profiling import dimensionality, granularity, distribution, stationarity
-from transformation import scaling, smoothing, aggregation, differentiation
+from pipelines import simple_average
+from pipelines.prepare import prepare
 
 
 jan = pd.read_csv('./data/1min/236_2023-01.csv')
 feb = pd.read_csv('./data/1min/236_2023-02.csv')
 mar = pd.read_csv('./data/1min/236_2023-03.csv')
-
 df = pd.concat([jan, feb, mar], axis=0)
 df = preprocess(df, datetime_col='registered_at')
 
@@ -19,29 +19,27 @@ df = preprocess(df, datetime_col='registered_at')
 # - system_load_controller_igbt_temperature_1
 # - system_battery_dchg_kwh
 
-## Profiling
-# dimensionality.analyze(df, 'system_battery_max_temperature')
-# granularity.analyze(df, 'system_battery_max_temperature')
-# distribution.analyze(df, 'system_battery_max_temperature')
-# stationarity.analyze(df, 'system_battery_max_temperature')
+# Profiling
+dimensionality.analyze(df, 'system_battery_max_temperature')
+granularity.analyze(df, 'system_battery_max_temperature')
+distribution.analyze(df, 'system_battery_max_temperature')
+stationarity.analyze(df, 'system_battery_max_temperature')
 
 
-## Transformations
-agg_funcs = {
-    'system_battery_max_temperature': 'mean',
-    # 'system_battery_min_temperature': 'mean',
-    'system_battery_soc': 'median',
-    'system_battery_current': 'mean',
-    # 'system_battery_voltage': 'mean',
-    'system_battery_chg_kwh': 'sum',
-    # 'system_battery_dchg_kwh': 'sum',
-    # 'system_fibo_temperature': 'mean',
-    # 'system_load_controller_igbt_temperature_1': 'mean',
-    'vehicle_speed_gps': 'mean',
-}
-cols = agg_funcs.keys()
+# Transformation
+df_1 = prepare(df, {
+    'scaling': False,
+    'aggregation': False,
+    'differentiation': False,
+})
 
-# scaled = scaling.run(df[cols], 'system_battery_max_temperature')
-# smoothed = smoothing.run(df, 'system_battery_max_temperature', window=50)
-# aggregated = aggregation.run(df[cols], 'system_battery_max_temperature', gran_level='W', agg_funcs=agg_funcs)
-differentiation.run(df[cols], 'system_battery_max_temperature')
+df_2 = prepare(df, {
+    'scaling': False,
+    'aggregation': { 'rule': 'H' },
+    'differentiation': False,
+})
+
+# Modeling
+simple_average.run(df_1, 'system_battery_max_temperature', { 'training_pct': 0.8, 'smoothing': False }, path='temp/no-transformations')
+simple_average.run(df_2, 'system_battery_max_temperature', {'training_pct': 0.8, 'smoothing': False }, path='temp/agg-by-hour')
+simple_average.run(df_1, 'system_battery_max_temperature', {'training_pct': 0.8, 'smoothing': { 'window': 30 } }, path='temp/agg-by-hour-w-smoothing')

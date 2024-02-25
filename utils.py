@@ -29,3 +29,7 @@ def log_execution_time(func=None, prefix=""):
     if func is None:
         return decorator
     return decorator(func)
+
+
+def get_options_with_default(options, default):
+    return {**default, **(options or {})}
