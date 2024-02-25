@@ -140,7 +140,7 @@ def analyze(df: DataFrame, target: str, savefig=True):
     Args:
         df (DataFrame): DataFrame to analyze
         target (str): Column name to analyze
-        savefig (bool, optional): Save figures to files. Defaults to True.
+        savefig (bool, optional): Save generated figures to files. Defaults to True.
     """
     print('\n-- Stationarity --')
     series = df[target]

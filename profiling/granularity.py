@@ -28,6 +28,7 @@ def analyze(df: DataFrame, target: str, savefig = True):
     Args:
         df (DataFrame): Dataframe with time series information. 
         target (str): Column name of `df` from which we are analyzing granularity
+        savefig (bool, optional): Save generated figures to files. Defaults to True.
     """
     print('\n-- Granularity --')
     series = df[target]
