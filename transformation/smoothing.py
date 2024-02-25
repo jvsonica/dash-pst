@@ -1,15 +1,15 @@
-from pandas import DataFrame, Series
-from sklearn.preprocessing import StandardScaler
+from pandas import Series
 from dslabs import plot_line_chart, HEIGHT
-from matplotlib.pyplot import Figure, Axes, subplots, figure
+from matplotlib.pyplot import Figure, Axes, subplots
+from preprocess import aggregation_func_by_col
 
 
-def run(df: DataFrame, target: str, window=50, savefig=True):
-    """Apply smoothing to df's target. Output a plot with multiple smoothing windows but
+def analyze(series: Series, target: str, window=50, savefig=True):
+    """Apply smoothing a series. Output a plot with multiple smoothing windows but
     return the series with `window` smoothing applied.
 
     Args:
-        df (DataFrame): Dataframe with time series information. 
+        df (Series): Series to apply smoothing. 
         target (str): Column name of `df` from which we are analyzing granularity.
         window (int): Smoothing window to apply.
         savefig (bool, optional): Save generated figures to files. Defaults to True.
@@ -17,7 +17,6 @@ def run(df: DataFrame, target: str, window=50, savefig=True):
     Returns
         Series: Scaled target variable.
     """
-    series: Series = df[target]
     sizes: list[int] = [25, 50, 75, 100]
     fig: Figure
     axs: list[Axes]
@@ -36,8 +35,22 @@ def run(df: DataFrame, target: str, window=50, savefig=True):
         )
     fig.tight_layout()
     if savefig:
-        fig.savefig(f'temp/{target}_smoothing.png')
-    else:
-        fig.show()
+        fig.savefig(f'temp/{target}_smoothing_mean.png')
 
-    return series.rolling(window=window).mean()
+    agg_func = aggregation_func_by_col[series.name]
+    return series.rolling(window=window).agg(agg_func)
+
+
+def run(series: Series, window:int = 50, agg_func:str = 'mean'):
+    """Apply `agg_func` smoothing on `window`.
+
+    Args:
+        series (Series): _description_
+        target (str): _description_
+        window (int, optional): _description_. Defaults to 50.
+        agg_func (str, optional): _description_. Defaults to 'mean'.
+
+    Returns:
+        Series: _description_
+    """
+    return series.rolling(window=window).agg(agg_func)

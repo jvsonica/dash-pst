@@ -3,7 +3,7 @@ from dslabs import plot_line_chart, plot_ts_multivariate_chart, HEIGHT
 from matplotlib.pyplot import figure
 
 
-def run(df: DataFrame, target: str, savefig=True):
+def analyze(df: DataFrame, target: str, savefig=True):
     """Plot differentiation applied to df.
 
     Args:
@@ -34,8 +34,16 @@ def run(df: DataFrame, target: str, savefig=True):
     if savefig:
         fig_target_diff.savefig(f'temp/{target}_differentiation-target.png')
         fig_full_diff.savefig(f'temp/{target}_differentiation-mv.png')
-    else:
-        fig_target_diff.show()
-        fig_full_diff.show()
 
-    return diff_df
+
+def run(df: DataFrame):
+    """Apply differentiation to entire dataframe.
+    TODO: explain differentiation
+
+    Args:
+        df (DataFrame):
+
+    Returns:
+        DataFrame: 
+    """
+    return df.diff()

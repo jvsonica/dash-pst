@@ -12,7 +12,7 @@ def scale_all_dataframe(data: DataFrame) -> DataFrame:
     return df
 
 
-def run(df: DataFrame, target: str, savefig=True):
+def analyze(df: DataFrame, target: str, savefig=True):
     """Apply scaling to all columns of the dataframe, including target variable.
 
     Args:
@@ -37,7 +37,18 @@ def run(df: DataFrame, target: str, savefig=True):
     fig.tight_layout()
     if savefig:
         fig.savefig(f'temp/{target}_scaling.png')
-    else:
-        fig.show()
 
     return scaled
+
+
+def run(df: DataFrame):
+    """Apply StandardScaler to entire dataframe.
+    TODO: explain scaling
+
+    Args:
+        df (DataFrame):
+
+    Returns:
+        DataFrame: 
+    """
+    return scale_all_dataframe(df)
