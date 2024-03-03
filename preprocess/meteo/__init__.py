@@ -29,6 +29,9 @@ def add_meteo_station(df):
 
     Args:
         df (pd.DataFrame): original dataframe.
+    
+    Returns:
+        pd.DataFrame: Dataframe with the additional meteo data.
     """
     def aggregate(chunk):
         station = get_closest_station(chunk.latitude.mean(), chunk.longitude.mean())
@@ -40,7 +43,7 @@ def add_meteo_station(df):
     
     print('add_meteo_station', 'adding meteostat information to df')
 
-    grouped = df.groupby(df.index // 60, group_keys=False) # calling aggregate once per hour
+    grouped = df.groupby(df.index // 60, group_keys=False)  # calling aggregate once per hour
     meteo = grouped.apply(aggregate)
 
     df['station_code'] = meteo['station_code']

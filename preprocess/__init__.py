@@ -7,6 +7,8 @@ def preprocess(df: pd.DataFrame, datetime_col: str):
     df = df.set_index(datetime_col)
 
     # Remove entries in which some important columns are missing
+    # LA: maybe we could try to fix these missing values in another way, temperature is fairly
+    # inferrable.
     for col in ['system_battery_max_temperature']:
         df = df.loc[~df[col].isna()]
 

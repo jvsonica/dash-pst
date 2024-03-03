@@ -1,15 +1,33 @@
+from typing import TypedDict, Optional
 from transformation import scaling, aggregation, differentiation
 from utils import get_options_with_default
 from preprocess import aggregation_func_by_col
 
 
-DEFAULT_PREPARE_OPTIONS = {
+class TransformationOptions(TypedDict):
+    scaling: Optional[bool]
+    aggregation: Optional[dict]
+    differentiation: Optional[bool]
+
+
+DEFAULT_PREPARE_OPTIONS : TransformationOptions = {
     'scaling': True,
     'aggregation': { 'rule': 'H' },
     'differentiation': False,
 }
 
-def prepare(df, options: dict|None= None):
+
+def transform(df, options: TransformationOptions = DEFAULT_PREPARE_OPTIONS.copy()):
+    """Apply transformations to `df` as described in `options`.
+
+
+    Args:
+        df (_type_): _description_
+        options (dict | None, optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
     options = get_options_with_default(options, default=DEFAULT_PREPARE_OPTIONS)
 
     # Scaling

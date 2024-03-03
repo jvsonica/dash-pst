@@ -1,21 +1,21 @@
 from pandas import DataFrame, Series
+from models import PersistenceRealistRegressor
 from pipelines.tasks.prepare import prepare
-from models import SimpleAvgRegressor
 from pipelines.tasks.report import save_report
 from utils import get_options_with_default
 
 
-DEFAULT_SIMPLE_AVERAGE_OPTIONS = {
+DEFAULT_PERSISTENCE_REALISTIC_OPTIONS = {
     'training_pct': 0.8,
-    'smoothing': { 'window': 50 }
+    'smoothing': { 'window': 50 },
 }
 
 
 def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
     # Resolve options taking into consideration defaults
-    options = get_options_with_default(options, DEFAULT_SIMPLE_AVERAGE_OPTIONS)
+    options = get_options_with_default(options, DEFAULT_PERSISTENCE_REALISTIC_OPTIONS)
 
-    print('\n-- Simple Average --')
+    print('\n-- Persistence Realistic Regressor --')
     print(f'target: {target}')
 
     # For Simple Average we only need to keep the target variable.
@@ -25,7 +25,7 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
     train, test = prepare(df, options)
 
     # Model data
-    fr_mod = SimpleAvgRegressor()
+    fr_mod = PersistenceRealistRegressor()
     fr_mod.fit(train)
     prd_trn: Series = fr_mod.predict(train)
     prd_tst: Series = fr_mod.predict(test)
@@ -35,7 +35,7 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
     # Save results to `path`
     if path:
         save_report(
-            'simple-average',
+            'persistence-realist',
             target,
             train,
             test,
@@ -43,4 +43,3 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
             prd_tst,
             path=path
         )
-    

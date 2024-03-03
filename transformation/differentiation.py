@@ -46,4 +46,4 @@ def run(df: DataFrame):
     Returns:
         DataFrame: 
     """
-    return df.diff()
+    return df.diff().dropna()

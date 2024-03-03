@@ -1,19 +1,37 @@
 import pandas as pd
 from preprocess import preprocess
 from profiling import dimensionality, granularity, distribution, stationarity
-from pipelines import simple_average
-from pipelines.prepare import prepare
+from transformation import aggregation
+from pipelines import (
+    simple_average,
+    persistence_optimistic,
+    persistence_realist,
+    linear_regression,
+    transform
+)
 
-
-jan = pd.read_csv('./data/1min/236_2023-01.csv')
-feb = pd.read_csv('./data/1min/236_2023-02.csv')
-mar = pd.read_csv('./data/1min/236_2023-03.csv')
-df = pd.concat([jan, feb, mar], axis=0)
+months = [
+    pd.read_csv('./data/1min/236_2023-01.csv'),
+    pd.read_csv('./data/1min/236_2023-02.csv'),
+    pd.read_csv('./data/1min/236_2023-03.csv'),
+    # pd.read_csv('./data/1min/236_2023-04.csv'),
+    # pd.read_csv('./data/1min/236_2023-05.csv'),
+    # pd.read_csv('./data/1min/236_2023-06.csv'),
+    # pd.read_csv('./data/1min/236_2023-07.csv'),
+    # pd.read_csv('./data/1min/236_2023-08.csv'),
+    # pd.read_csv('./data/1min/236_2023-09.csv'),
+    # pd.read_csv('./data/1min/236_2023-10.csv'),
+    # pd.read_csv('./data/1min/236_2023-11.csv'),
+    # pd.read_csv('./data/1min/236_2023-12.csv')
+]
+df = pd.concat(months, axis=0)
 df = preprocess(df, datetime_col='registered_at')
+df = aggregation.run(df, gran_level='H')
 
-# LA: Other variables in the dataset that we could try:
+# LA: For the project I will be using "system_battery_max_temperature"
+# as the target variable. 
+# Still, here are other variables in the dataset that may be interesting:
 # - system_battery_soc
-# - system_battery_max_temperature
 # - system_battery_min_temperature
 # - system_fibo_temperature
 # - system_load_controller_igbt_temperature_1
@@ -25,21 +43,31 @@ granularity.analyze(df, 'system_battery_max_temperature')
 distribution.analyze(df, 'system_battery_max_temperature')
 stationarity.analyze(df, 'system_battery_max_temperature')
 
-
 # Transformation
-df_1 = prepare(df, {
+df_raw = transform(df, {
     'scaling': False,
     'aggregation': False,
     'differentiation': False,
 })
 
-df_2 = prepare(df, {
-    'scaling': False,
-    'aggregation': { 'rule': 'H' },
-    'differentiation': False,
-})
+# df_scaled = transform(df, {
+#     'scaling': True,
+#     'aggregation': False,
+#     'differentiation': False,
+# })
+
+# df_diff = transform(df, {
+#     'scaling': False,
+#     'aggregation': False,
+#     'differentiation': True,
+# })
 
 # Modeling
-simple_average.run(df_1, 'system_battery_max_temperature', { 'training_pct': 0.8, 'smoothing': False }, path='temp/no-transformations')
-simple_average.run(df_2, 'system_battery_max_temperature', {'training_pct': 0.8, 'smoothing': False }, path='temp/agg-by-hour')
-simple_average.run(df_1, 'system_battery_max_temperature', {'training_pct': 0.8, 'smoothing': { 'window': 30 } }, path='temp/agg-by-hour-w-smoothing')
+options = { 'training_pct': 0.8, 'smoothing': False }
+
+# simple_average.run(df_scaled, 'system_battery_max_temperature', options, path='temp/scaled-simple-average')
+# simple_average.run(df_diff, 'system_battery_max_temperature', options, path='temp/diff-simple-average')
+simple_average.run(df_raw, 'system_battery_max_temperature', options, path='temp/raw-simple-average')
+persistence_optimistic.run(df_raw, 'system_battery_max_temperature', options, path='temp/raw-persistence-optimistic')
+persistence_realist.run(df_raw, 'system_battery_max_temperature', options, path='temp/raw-persistence-realist')
+linear_regression.run(df_raw, 'system_battery_max_temperature', options, path='temp/raw-linear-regression')
