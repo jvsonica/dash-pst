@@ -1,5 +1,7 @@
 import time
-
+import numpy as np
+import pandas as pd
+from models import LinearRegression
 
 def log_execution_time(func=None, prefix=""):
     """
@@ -33,3 +35,10 @@ def log_execution_time(func=None, prefix=""):
 
 def get_options_with_default(options, default):
     return {**default, **(options or {})}
+
+def calc_linear_regression(series):
+    x = np.arange(len(series)).reshape(-1, 1)
+    y = series.to_numpy()
+    model = LinearRegression()
+    model.fit(x, y)
+    return pd.Series(model.predict(x), index=series.index)

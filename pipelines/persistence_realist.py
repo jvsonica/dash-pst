@@ -7,7 +7,7 @@ from utils import get_options_with_default
 
 DEFAULT_PERSISTENCE_REALISTIC_OPTIONS = {
     'training_pct': 0.8,
-    'smoothing': { 'window': 50 },
+    'smoothing': False,
 }
 
 
@@ -23,6 +23,8 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
 
     # Prepare dataset
     train, test = prepare(df, options)
+    train = train[target]
+    test = test[target]
 
     # Model data
     fr_mod = PersistenceRealistRegressor()

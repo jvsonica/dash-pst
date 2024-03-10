@@ -1,8 +1,9 @@
 from pandas import DataFrame, Series
 from numpy import arange
 from models import LinearRegression
-from pipelines import prepare
-from pipelines import save_report
+from pipelines.tasks import prepare, save_report
+# from pipelines.tasks.prepare import prepare
+# from pipelines.tasks.report import save_report
 from utils import get_options_with_default
 
 DEFAULT_LINEAR_REGRESSION_OPTS = {
@@ -15,7 +16,7 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
     # Resolve options taking into consideration defaults
     options = get_options_with_default(options, DEFAULT_LINEAR_REGRESSION_OPTS)
 
-    print('\n-- Linear Regression Average --') 
+    print('\n-- Linear Regression --') 
     print(f'target: {target}')
 
     # For Linear Regression we only need to keep the target variable.
@@ -23,6 +24,8 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
 
     # Prepare dataset
     train, test = prepare(df)
+    train = train[target]
+    test = test[target]
 
     train_x = arange(len(train)).reshape(-1, 1)
     train_y = train.to_numpy()
@@ -51,3 +54,5 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
             observations=[f'Intercept: {model.intercept_:.2f}', f'Coef: {model.coef_[0]:.2f}'],
             path=path
         )
+
+    return train, test, prd_trn, prd_tst

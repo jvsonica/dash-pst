@@ -4,9 +4,9 @@ from dslabs import (
     plot_forecasting_series,
     plot_forecasting_eval,
 )
-from models import evaluate
+from .evaluate import evaluate
 
-def save_report(model, target, train, test, predicted_train, predicted_test, observations=[], path='temp/'):
+def save_report(model, target, train, test, predicted_train, predicted_test, observations=[], path='temp/', title=""):
     # Create target dir if it doesn't exist
     os.makedirs(path, exist_ok=True)
     
@@ -17,7 +17,7 @@ def save_report(model, target, train, test, predicted_train, predicted_test, obs
     
     # Plot forecast
     plot_forecasting_eval(
-        train, test, predicted_train, predicted_test, title=f"{target} - {model}"
+        train, test, predicted_train, predicted_test, title=f"{title} {target} ({model})"
     )
     savefig(f"{path}/{model}-{target}-eval.png")
 
