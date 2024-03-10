@@ -1,41 +1,52 @@
-from pandas import Series
-from dslabs import plot_line_chart, HEIGHT
+from pandas import Series, DataFrame
+from dslabs import plot_forecasting_series_on_ax
 from matplotlib.pyplot import Figure, Axes, subplots
 from preprocess import aggregation_func_by_col
+from pipelines import linear_regression
+from pipelines.tasks.evaluate import evaluate, compare_with_linear_reg
 
 
-def analyze(series: Series, target: str, window=50, savefig=True):
-    """Apply smoothing a series. Output a plot with multiple smoothing windows but
-    return the series with `window` smoothing applied.
-
-    Args:
-        df (Series): Series to apply smoothing. 
-        target (str): Column name of `df` from which we are analyzing granularity.
-        window (int): Smoothing window to apply.
-        savefig (bool, optional): Save generated figures to files. Defaults to True.
-
-    Returns
-        Series: Scaled target variable.
+def analyze(df: DataFrame, target: str, windows=None, plot_title='Smoothing Analysis', savefig=True):
+    """Apply smoothing a series. Output a plot with multiple smoothing windows.
     """
-    sizes: list[int] = [25, 50, 75, 100]
+    sizes: list[int] = windows
+    if windows is None:
+        sizes = [12, 24, 36, 48]
+
+    series: Series = df[target]
     fig: Figure
     axs: list[Axes]
-    fig, axs = subplots(len(sizes), 1, figsize=(3 * HEIGHT, HEIGHT / 2 * len(sizes)))
-    fig.suptitle(f"{target} after smoothing")
+    metrics = {}
+    plot_count = len(sizes) + 1
+    fig, axs = subplots(plot_count, 1, figsize=(16, plot_count * 1.5))
+    fig.suptitle(plot_title)
 
-    for i in range(len(sizes)):
-        ss_smooth: Series = series.rolling(window=sizes[i]).mean()
-        plot_line_chart(
-            ss_smooth.index.to_list(),
-            ss_smooth.to_list(),
+    # No diff
+    metrics_raw = compare_with_linear_reg(df, target, ax=axs[0], plot_subtitle="no smoothing")
+    metrics['no-smoothing'] = metrics_raw
+    print('No smoothing:')
+    print(DataFrame(metrics_raw))
+
+    for i in range(1, len(sizes) + 1):
+        window = sizes[i-1]
+        df[f'window={window}'] = series.rolling(window=window).mean()
+        iter_metrics = compare_with_linear_reg(
+            df[[f'window={window}']].dropna(),
+            f'window={window}',
             ax=axs[i],
-            xlabel=ss_smooth.index.name,
-            ylabel=target,
-            title=f"size={sizes[i]}",
+            plot_subtitle=f'window={window}'
         )
+        print(f'window={window}:')
+        print(DataFrame(iter_metrics))
+        metrics[f'window={window}'] = iter_metrics
+
     fig.tight_layout()
+
     if savefig:
-        fig.savefig(f'temp/{target}_smoothing_mean.png')
+        fig.savefig(f'temp/smoothing_mean_analysis_w_lr_{target}.png')
+        results = DataFrame({ k: v['test'] for (k, v) in metrics.items() })
+        results.transpose().to_csv(f'temp/smoothing_mean_analysis_w_lr_{target}.txt')
+
 
     agg_func = aggregation_func_by_col[series.name]
     return series.rolling(window=window).agg(agg_func)

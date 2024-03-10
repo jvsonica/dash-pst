@@ -924,6 +924,30 @@ FORECAST_MEASURES = {
     "MAPE": mean_absolute_percentage_error,
 }
 
+def plot_forecasting_series_on_ax(
+    trn: Series,
+    tst: Series,
+    prd_tst: Series,
+    ax: Axes,
+    title: str = "",
+    xlabel: str = "time",
+    ylabel: str = "",
+) -> list[Axes]:
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.plot(trn.index, trn.values, label="train", color=PAST_COLOR)
+    ax.plot(tst.index, tst.values, label="test", color=FUTURE_COLOR)
+    ax.plot(
+        prd_tst.index,
+        prd_tst.values,
+        "--",
+        label="test prediction",
+        color=PRED_FUTURE_COLOR,
+    )
+    ax.legend(prop={"size": 5})
+
+    return ax
 
 def plot_forecasting_series(
     trn: Series,
