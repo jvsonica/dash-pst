@@ -12,6 +12,10 @@ def preprocess(df: pd.DataFrame, datetime_col: str):
     for col in ['system_battery_max_temperature']:
         df = df.loc[~df[col].isna()]
 
+    # If battery_voltage is 0, then batteries are not properly communicating
+    # their metrics, and such records should be dropped.
+    df = df.loc[df['system_battery_voltage'] != 0]
+
     ## Add meteorology station to dataframe if it doesn't exist yet
     # if 'station_code' not in df.columns:
     #     df = add_meteo_station(df)
