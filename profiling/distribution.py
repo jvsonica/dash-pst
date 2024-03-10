@@ -14,23 +14,32 @@ def create_five_number_summary_fig(series: Series):
     """
     # LA: for temperature variables, there's no point in trying the sum aggfunc
     ss_hourly: Series = ts_aggregation_by(series, gran_level="h", agg_func='mean')
-    ss_weekly: Series = ts_aggregation_by(series, gran_level="W", agg_func='mean')
+    ss_daily: Series = ts_aggregation_by(series, gran_level="D", agg_func='mean')
 
     fig: Figure
     axs: array
-    fig, axs = subplots(2, 2, figsize=(2 * HEIGHT, HEIGHT))
-    set_chart_labels(axs[0, 0], title="HOURLY")
-    axs[0, 0].boxplot(ss_hourly.values)
-    set_chart_labels(axs[0, 1], title="WEEKLY")
-    axs[0, 1].boxplot(ss_weekly)
+    fig, axs = subplots(2, 3, figsize=(2 * HEIGHT, HEIGHT))
+
+    set_chart_labels(axs[0, 0], title="1 MIN")
+    axs[0, 0].boxplot(series.values)
+
+    set_chart_labels(axs[0, 1], title="HOURLY")
+    axs[0, 1].boxplot(ss_hourly.values)
+
+    set_chart_labels(axs[0, 2], title="DAILY")
+    axs[0, 2].boxplot(ss_daily)
 
     axs[1, 0].grid(False)
     axs[1, 0].set_axis_off()
-    axs[1, 0].text(0.2, 0, str(ss_hourly.describe()), fontsize="small")
+    axs[1, 0].text(0.2, 0, str(series.describe()), fontsize="small")
 
     axs[1, 1].grid(False)
     axs[1, 1].set_axis_off()
-    axs[1, 1].text(0.2, 0, str(ss_weekly.describe()), fontsize="small")
+    axs[1, 1].text(0.2, 0, str(ss_hourly.describe()), fontsize="small")
+
+    axs[1, 2].grid(False)
+    axs[1, 2].set_axis_off()
+    axs[1, 2].text(0.2, 0, str(ss_daily.describe()), fontsize="small")
 
     return fig
 
@@ -42,13 +51,16 @@ def create_variable_distribution_fig(series: Series):
     Args:
         series (Series): Series to be analyzed.
     """
+    ss_hourly: Series = ts_aggregation_by(series, gran_level="H", agg_func='mean')
     ss_daily: Series = ts_aggregation_by(series, gran_level="D", agg_func='mean')
-    ss_weekly: Series = ts_aggregation_by(series, gran_level="W", agg_func='mean')
-    ss_monthly: Series = ts_aggregation_by(series, gran_level="M", agg_func='mean')
-    ss_quarterly: Series = ts_aggregation_by(series, gran_level="Q", agg_func='mean')
+    # ss_weekly: Series = ts_aggregation_by(series, gran_level="W", agg_func='mean')
+    # ss_monthly: Series = ts_aggregation_by(series, gran_level="M", agg_func='mean')
+    # ss_quarterly: Series = ts_aggregation_by(series, gran_level="Q", agg_func='mean')
 
-    grans: list[Series] = [series, ss_daily, ss_weekly, ss_monthly, ss_quarterly]
-    gran_names: list[str] = ["Hourly", "Daily", "Weekly", "Monthly", "Quarterly"]
+    # grans: list[Series] = [series, ss_daily, ss_weekly, ss_monthly, ss_quarterly]
+    grans: list[Series] = [series, ss_hourly, ss_daily]
+    # gran_names: list[str] = ["1 minute", "Hourly", "Daily", "Weekly", "Monthly", "Quarterly"]
+    gran_names: list[str] = ["1 minute", "Hourly", "Daily"]
 
     fig, axs = subplots(1, len(grans), figsize=(len(grans) * HEIGHT, HEIGHT))
     fig.suptitle(f"{series.name}")
@@ -126,31 +138,30 @@ def analyze(df: DataFrame, target: str, savefig = True):
     print('\n-- Distribution --')
     series: Series = df[target]
 
-    fig_five_number_summ = create_five_number_summary_fig(series)
+    fig_variable_boxplot = create_five_number_summary_fig(series)
     fig_variable_distribution = create_variable_distribution_fig(series)
-    fig_autocorrelation_lags = create_autocorrelation_lagged_fig(series, max_lag=90, delta=30)
-    fig_autocorrelation_study = create_autocorrelation_study_fig(series, max_lag = 10, delta = 1)
+    # fig_autocorrelation_lags = create_autocorrelation_lagged_fig(series, max_lag=90, delta=30)
+    # fig_autocorrelation_study = create_autocorrelation_study_fig(series, max_lag = 10, delta = 1)
 
     # LA: When comparing with lagged, for better visibility, I am using the aggregated hourly series.
     # could using different max_lag/delta help out?
-    ss_hourly = ts_aggregation_by(series, gran_level="D", agg_func='mean')
-    fig_autocorrelation_study_hourly = create_autocorrelation_study_fig(ss_hourly, max_lag = 10, delta = 1)
+    # ss_hourly = ts_aggregation_by(series, gran_level="D", agg_func='mean')
+    # fig_autocorrelation_study_hourly = create_autocorrelation_study_fig(ss_hourly, max_lag = 10, delta = 1)
 
-    
     if savefig:
-        fig_five_number_summ.savefig(f'temp/{target}_distribution-5-num-summary.png')
+        fig_variable_boxplot.savefig(f'temp/{target}_distribution-variable-boxplot.png')
         fig_variable_distribution.savefig(f'temp/{target}_distribution-variable-histograms.png')
-        fig_autocorrelation_lags.savefig(f'temp/{target}_distribution-autocorrelation-lags.png')
-        fig_autocorrelation_study.savefig(f'temp/{target}_distribution-autocorrelation-study.png')
-        fig_autocorrelation_study_hourly.savefig(f'temp/{target}_distribution-autocorrelation-study-hourly.png')
-        print(f'saved temp/{target}_distribution-5-num-summary.png')
+        # fig_autocorrelation_lags.savefig(f'temp/{target}_distribution-autocorrelation-lags.png')
+        # fig_autocorrelation_study.savefig(f'temp/{target}_distribution-autocorrelation-study.png')
+        # fig_autocorrelation_study_hourly.savefig(f'temp/{target}_distribution-autocorrelation-study-hourly.png')
+        print(f'saved temp/{target}_distribution-variable-boxplot.png')
         print(f'saved temp/{target}_distribution-variable-histograms.png')
-        print(f'saved temp/{target}_distribution-autocorrelation-lags.png')
-        print(f'saved temp/{target}_distribution-autocorrelation-study.png')
-        print(f'saved temp/{target}_distribution-autocorrelation-study-hourly.png')
+        # print(f'saved temp/{target}_distribution-autocorrelation-lags.png')
+        # print(f'saved temp/{target}_distribution-autocorrelation-study.png')
+        # print(f'saved temp/{target}_distribution-autocorrelation-study-hourly.png')
     else:
-        fig_five_number_summ.show()
+        fig_variable_boxplot.show()
         fig_variable_distribution.show()
-        fig_autocorrelation_lags.show()
-        fig_autocorrelation_study.show()
-        fig_autocorrelation_study_hourly.show()
+        #  fig_autocorrelation_lags.show()
+        #  fig_autocorrelation_study.show()
+        #  fig_autocorrelation_study_hourly.show()

@@ -18,7 +18,7 @@ def analyze(df: pd.DataFrame, target: str, savefig=True):
 
     dimensionality = [
         f"{target}:",
-        f"Nr. Records =  {series.shape[0]}",
+        f"Nr. Records =  {df.shape}",
         f"First timestamp {series.index[0]}",
         f"Last timestamp {series.index[-1]}",
     ]

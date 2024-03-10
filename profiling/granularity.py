@@ -32,7 +32,7 @@ def analyze(df: DataFrame, target: str, savefig = True):
     """
     print('\n-- Granularity --')
     series = df[target]
-    grans: list[str] = ["D", "W", "M"]
+    grans: list[str] = ["H", "D"]
 
     fig: Figure
     axs: list[Axes]

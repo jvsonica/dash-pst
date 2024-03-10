@@ -32,8 +32,8 @@ def plot_components(
     rows: int = len(components)
     fig: Figure
     axs: list[Axes]
-    fig, axs = subplots(rows, 1, figsize=(3 * HEIGHT, rows * HEIGHT))
-    fig.suptitle(f"{series.name} hourly")
+    fig, axs = subplots(rows, 1, figsize=(16, 8))
+    fig.suptitle(f"{series.name}")
     i: int = 0
     for key in components:
         set_chart_labels(axs[i], title=key, xlabel=series.index.name, ylabel=series.name)
@@ -144,8 +144,8 @@ def analyze(df: DataFrame, target: str, savefig=True):
     """
     print('\n-- Stationarity --')
     series = df[target]
-    ss_hourly: Series = ts_aggregation_by(series, gran_level="h", agg_func='mean')
-    ss_hourly = ss_hourly.asfreq('h')
+    ss_hourly: Series = ts_aggregation_by(series, gran_level="d", agg_func='mean')
+    ss_hourly = ss_hourly.asfreq('d')
     ss_hourly = ss_hourly.ffill()
 
     fig_components = plot_components(ss_hourly)
