@@ -43,8 +43,7 @@ def prepare(data, options: PrepareOptions = DEFAULT_PREPARE_OPTIONS.copy()):
 
     # Smooth on training set
     if 'smoothing' in options and options['smoothing']:
-        agg_func = { k: v for (k, v) in aggregation_func_by_col.items() if k in data.columns }
-        train = smoothing.run(train, window=options['smoothing']['window'], agg_func=agg_func)
+        train = smoothing.run(train, window=options['smoothing']['window'])
         train = train.dropna()
 
         # Ensure we return a Series when parameter `data` was a Series.

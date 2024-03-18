@@ -1,8 +1,7 @@
 import os
 from pandas import DataFrame, Series
 from models import PersistenceOptimistRegressor
-from pipelines import prepare
-from pipelines import save_report
+from pipelines.tasks import prepare, save_report
 from utils import get_options_with_default
 
 
@@ -37,7 +36,7 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
     # Save results to `path`
     if path:
         save_report(
-            'persistence-optimistic',
+            'persistence-one-step-behind',
             target,
             train,
             test,

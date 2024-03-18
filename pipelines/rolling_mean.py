@@ -1,8 +1,8 @@
 from pandas import DataFrame, Series
 from pipelines.tasks.prepare import prepare
 from models import RollingMeanRegressor
-from pipelines import evaluate, save_report
 from utils import get_options_with_default
+from pipelines.tasks import prepare, save_report, evaluate
 from dslabs import DELTA_IMPROVE, plot_line_chart, HEIGHT
 from matplotlib.pyplot import figure
 
@@ -21,14 +21,13 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
     print('\n-- Rolling Mean --')
     print(f'target: {target}')
 
-    # For Rolling Mean we only need to keep the target variable.
-    df = df[[target]].copy()
-
     # Prepare dataset
     train, test = prepare(df, options)
+    train = train[target]
+    test = test[target]
 
     # Model data
-    win_size = (12, 24, 36, 48, 96, 192, 384, 768)
+    win_size = (2, 4, 6, 12, 24, 36, 48, 48+12, 48+24, 96, 96+48, 192, 192 + 48 + 48, 192+48+192)
     metric = options['optimize_for']
     best_result: dict = {"metric": metric, "params": (), "predicted_test": None, "predicted_train": None, "perf": -10000}
 
@@ -48,13 +47,14 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
             best_result["predicted_train"] = prd_train
             best_result["model"] = pred
         yvalues.append(eval)
+        print(f"w={w} got {eval}")
 
     print(f"Best model using win={best_result['params'][0]} ({win_size})")
 
     # Save results to `path`
     if path:
         save_report(
-            f'rolling-mean-{metric}',
+            f'rolling-mean-{metric}-win={best_result["params"][0]}',
             target,
             train,
             test,
@@ -65,43 +65,9 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
         )
     
     fig = figure(figsize=(3 * HEIGHT, HEIGHT))
-    plot_line_chart(
+    ax = plot_line_chart(
         win_size, yvalues, title=f"Rolling Mean ({metric})", xlabel="window size", ylabel=metric, percentage=True
     )
+    ax.set_ylim(-3, 1)
     fig.tight_layout()
     fig.savefig(f"{path}/rolling-mean-parameter-tuning-for-{metric}.png")
-
-
-
-"""
-    flag = measure == "R2" or measure == "MAPE"
-    best_model = None
-    best_params: dict = {"name": "ARIMA", "metric": measure, "params": ()}
-    best_performance: float = -100000
-
-    fig, axs = subplots(1, len(d_values), figsize=(len(d_values) * HEIGHT, HEIGHT))
-    for i in range(len(d_values)):
-        d: int = d_values[i]
-        values = {}
-        for q in q_params:
-            yvalues = []
-            for p in p_params:
-                arima = ARIMA(train, order=(p, d, q))
-                model = arima.fit()
-                prd_tst = model.forecast(steps=len(test), signal_only=False)
-                eval: float = FORECAST_MEASURES[measure](test, prd_tst)
-                # print(f"ARIMA ({p}, {d}, {q})", eval)
-                if eval > best_performance and abs(eval - best_performance) > DELTA_IMPROVE:
-                    best_performance: float = eval
-                    best_params["params"] = (p, d, q)
-                    best_model = model
-                yvalues.append(eval)
-            values[q] = yvalues
-        plot_multiline_chart(
-            p_params, values, ax=axs[i], title=f"ARIMA d={d} ({measure})", xlabel="p", ylabel=measure, percentage=flag
-        )
-    print(
-        f"ARIMA best results achieved with (p,d,q)=({best_params['params'][0]:.0f}, {best_params['params'][1]:.0f}, {best_params['params'][2]:.0f}) ==> measure={best_performance:.2f}"
-    )
-
-"""

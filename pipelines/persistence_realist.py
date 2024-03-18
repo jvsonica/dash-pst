@@ -37,7 +37,7 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
     # Save results to `path`
     if path:
         save_report(
-            'persistence-realist',
+            'persistence-long-term',
             target,
             train,
             test,
