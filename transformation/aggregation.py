@@ -1,4 +1,4 @@
-from pandas import DataFrame, Series
+from pandas import DataFrame
 from matplotlib.pyplot import subplots
 from dslabs import ts_aggregation_by, plot_forecasting_series_on_ax
 from preprocess import aggregation_func_by_col
@@ -60,13 +60,13 @@ def analyze(df: DataFrame, target: str, agg_funcs: str|dict = aggregation_func_b
     fig.tight_layout()
 
     if savefig:
-        fig.savefig(f'temp/{target}_aggregation_analysis_vs_lr.png')
+        fig.savefig(f'temp/aggregation_analysis_vs_lr_{target}_.png')
         results = DataFrame({
             'no-agg': metrics_raw['test'],
             'h': metrics_hour['test'],
             'd': metrics_day['test']
         })
-        results.transpose().to_csv(f'temp/{target}_aggregation_analysis_vs_lr.txt')
+        results.transpose().to_csv(f'temp/aggregation_analysis_vs_lr_{target}_.txt')
 
 
 def run(df: DataFrame, gran_level: str='W', agg_funcs=aggregation_func_by_col):

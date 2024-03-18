@@ -2,8 +2,7 @@ from pandas import Series, DataFrame
 from dslabs import plot_forecasting_series_on_ax
 from matplotlib.pyplot import Figure, Axes, subplots
 from preprocess import aggregation_func_by_col
-from pipelines import linear_regression
-from pipelines.tasks.evaluate import evaluate, compare_with_linear_reg
+from pipelines.tasks.evaluate import compare_with_linear_reg
 
 
 def analyze(df: DataFrame, target: str, windows=None, plot_title='Smoothing Analysis', savefig=True):
@@ -22,10 +21,9 @@ def analyze(df: DataFrame, target: str, windows=None, plot_title='Smoothing Anal
     fig.suptitle(plot_title)
 
     # No diff
-    metrics_raw = compare_with_linear_reg(df, target, ax=axs[0], plot_subtitle="no smoothing")
-    metrics['no-smoothing'] = metrics_raw
+    metrics['no-smoothing'] = compare_with_linear_reg(df, target, ax=axs[0], plot_subtitle="no smoothing")
     print('No smoothing:')
-    print(DataFrame(metrics_raw))
+    print(DataFrame(metrics['no-smoothing']))
 
     for i in range(1, len(sizes) + 1):
         window = sizes[i-1]
@@ -52,7 +50,7 @@ def analyze(df: DataFrame, target: str, windows=None, plot_title='Smoothing Anal
     return series.rolling(window=window).agg(agg_func)
 
 
-def run(series: Series, window:int = 50, agg_func:str = 'mean'):
+def run(series: Series, window:int = 24):
     """Apply `agg_func` smoothing on `window`.
 
     Args:
@@ -64,4 +62,4 @@ def run(series: Series, window:int = 50, agg_func:str = 'mean'):
     Returns:
         Series: _description_
     """
-    return series.rolling(window=window).agg(agg_func)
+    return series.rolling(window=window).mean()

@@ -35,7 +35,7 @@ def analyze(df: DataFrame, target: str, plot_title='Differentiation Analysis', s
     fig.suptitle(plot_title)
 
     # No diff
-    metrics_raw = compare_with_linear_reg(df, target, ax=axs[0], plot_subtitle="no aggregation")
+    metrics_raw = compare_with_linear_reg(df, target, ax=axs[0], plot_subtitle="no differentiation")
     print('No differentiation:')
     print(DataFrame(metrics_raw))
 
