@@ -41,12 +41,8 @@ def find_best_parameters(train, test, optimize_for='R2', exogenous=None, path='.
     best_result: dict = {"metric": metric, "params": (), "predicted_test": None, "predicted_train": None, "perf": -10000}
 
     d_values = [0, 1, 2]
-    p_params = [1, 2, 3, 5, 7, 10]
-    q_params = [1, 3, 5, 7]
-
-    # d_values = [0,1,2]
-    # p_params = [1]
-    # q_params = [1]
+    p_params = [1, 4, 8, 12, 16]
+    q_params = [1, 2, 4, 8]
 
     fig, axs = subplots(1, len(d_values), figsize=(len(d_values) * HEIGHT, HEIGHT))
     for d in d_values:
@@ -56,11 +52,11 @@ def find_best_parameters(train, test, optimize_for='R2', exogenous=None, path='.
             for p in p_params:
                 start = time.time()
                 if exogenous is not None:
-                    arima = ARIMA(train, exog=exogenous['train'], order=(p, d, q), missing='none')
+                    arima = ARIMA(train, exog=exogenous['train'], order=(p, d, q))
                     model = arima.fit()
                     prd_test = model.forecast(steps=len(test), exog=exogenous['test'], signal_only=False)
                 else:
-                    arima = ARIMA(train, order=(p, d, q), missing='none')
+                    arima = ARIMA(train, order=(p, d, q))
                     model = arima.fit()
                     prd_test = model.forecast(steps=len(test), signal_only=False)
 
@@ -105,7 +101,7 @@ def run(df: DataFrame, target: str, options: dict|None= None, path='temp/'):
     target_train = train[target]
     target_test = test[target]
 
-    # diagnostics(train, test, target='system_battery_max_temperature', path=path)
+    # diagnostics(target_train, target_test, target='system_battery_max_temperature', path=path)
 
     exogenous = None
     if 'exogenous' in options and len(options['exogenous']) > 0:
