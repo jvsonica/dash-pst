@@ -44,7 +44,7 @@ def prepare(data, options: PrepareOptions = DEFAULT_PREPARE_OPTIONS.copy()):
     # Smooth on training set
     if 'smoothing' in options and options['smoothing']:
         train = smoothing.run(train, window=options['smoothing']['window'])
-        train = train.dropna()
+        train = train.iloc[options['smoothing']['window']-1:].copy()
 
         # Ensure we return a Series when parameter `data` was a Series.
         if type(data) == pd.Series:

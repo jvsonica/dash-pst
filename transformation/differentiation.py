@@ -71,4 +71,4 @@ def run(df: DataFrame):
     Returns:
         DataFrame: 
     """
-    return df.diff().dropna()
+    return df.diff().iloc[1:].copy()
